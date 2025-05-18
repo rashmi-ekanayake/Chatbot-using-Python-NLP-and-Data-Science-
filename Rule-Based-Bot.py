@@ -23,7 +23,12 @@ class RuleBot:
         self.alienbabble = {
             'describe_planet_intent': r'.*\s*your planet.*',
             'answer_why_intent': r'why\sare.*',
-            'about_intellipat': r'.*\s*intellipaat.*'
+            'about_intellipat': r'.*\s*intellipaat.*',
+            # New intents added below
+            'greet_intent': r'hi|hello|hey',
+            'farewell_intent': r'bye|goodbye|see you',
+            'ask_name_intent': r'what\sis\syour\sname.*',
+            'weather_intent': r'.*\sweather.*',
         }
 
     def greet(self):
@@ -62,18 +67,25 @@ class RuleBot:
                 reply = input(response).lower()
 
     def match_reply(self, reply):
-        for key, value in self.alienbabble.items():
-            intent = key
-            regex_pattern = value
-            found_match = re.match(regex_pattern, reply)
-            if found_match and intent == 'describe_planet_intent':
-                return self.describe_planet_intent()
-            elif found_match and intent == 'answer_why_intent':
-                return self.answer_why_intent()
-            elif found_match and intent == 'about_intellipat':
-                return self.about_intellipat()
+        for intent, pattern in self.alienbabble.items():
+            if re.match(pattern, reply):
+                if intent == 'describe_planet_intent':
+                    return self.describe_planet_intent()
+                elif intent == 'answer_why_intent':
+                    return self.answer_why_intent()
+                elif intent == 'about_intellipat':
+                    return self.about_intellipat()
+                elif intent == 'greet_intent':
+                    return self.greet_intent()
+                elif intent == 'farewell_intent':
+                    return self.farewell_intent()
+                elif intent == 'ask_name_intent':
+                    return self.ask_name_intent()
+                elif intent == 'weather_intent':
+                    return self.weather_intent()
         return self.no_match_intent()
 
+    # Existing intent handlers
     def describe_planet_intent(self):
         return "My planet is a vast, cold wasteland with crystalline mountains and glowing lakes."
 
@@ -82,6 +94,19 @@ class RuleBot:
 
     def about_intellipat(self):
         return "Intellipaat is an e-learning platform that offers technical courses to help humans grow smarter."
+
+    # New intent handlers added
+    def greet_intent(self):
+        return "Hello there! How can I learn more about your planet today?"
+
+    def farewell_intent(self):
+        return "Goodbye! Safe travels on Earth."
+
+    def ask_name_intent(self):
+        return "I am Rule-Bot, your friendly alien chatbot."
+
+    def weather_intent(self):
+        return "I have not yet learned about your weather systems. Can you tell me more?"
 
     def no_match_intent(self):
         return random.choice(self.no_match_responses)
