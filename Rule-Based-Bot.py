@@ -1,14 +1,11 @@
 import re
 import random
+import tkinter as tk
+from tkinter import scrolledtext
 
 class RuleBot:
-    # Potential Negative Responses
     negative_responses = ("no", "nope", "nah", "naw", "not a chance", "sorry")
-
-    # Exit conversation keywords
     exit_commands = ("quit", "pause", "exit", "goodbye", "bye", "later")
-
-    # Random starter questions
     random_questions = (
         "Why are you here?",
         "Are there many humans like you?",
@@ -23,98 +20,9 @@ class RuleBot:
         self.alienbabble = {
             'describe_planet_intent': r'.*\s*your planet.*',
             'answer_why_intent': r'why\sare.*',
-            'about_intellipat': r'.*\s*intellipaat.*',
-            # New intents added below
-            'greet_intent': r'hi|hello|hey',
-            'farewell_intent': r'bye|goodbye|see you',
-            'ask_name_intent': r'what\sis\syour\sname.*',
-            'weather_intent': r'.*\sweather.*',
+            'about_intellipat': r'.*\s*intellipaat.*'
         }
-
-    def greet(self):
-        self.name = input("What is your name? ")
-        will_help = input(
-            f"Hi {self.name}, I am Rule-Bot. Will you help me learn about your planet?\n"
-        )
-        if will_help.lower() in self.negative_responses:
-            print("Ok, have a nice Earth day!")
-            return
-        self.chat()
-
-    def make_exit(self, reply):
-        for command in self.exit_commands:
-            if reply.lower() == command:
-                print("Okay, have a nice Earth day!")
-                return True
-        return False
-
-    def chat(self):
-        no_match_count = 0
-        reply = input(random.choice(self.random_questions)).lower()
-
-        while not self.make_exit(reply):
-            response = self.match_reply(reply)
-
-            if response in self.no_match_responses:
-                no_match_count += 1
-            else:
-                no_match_count = 0  # Reset on meaningful answer
-
-            if no_match_count >= 2:
-                reply = input(random.choice(self.random_questions)).lower()
-                no_match_count = 0
-            else:
-                reply = input(response).lower()
-
-    def match_reply(self, reply):
-    for intent, pattern in self.alienbabble.items():
-        if re.search(pattern, reply):  # changed from re.match() to re.search()
-            if intent == 'describe_planet_intent':
-                return self.describe_planet_intent()
-            elif intent == 'answer_why_intent':
-                return self.answer_why_intent()
-            elif intent == 'about_intellipat':
-                return self.about_intellipat()
-            elif intent == 'greet_intent':
-                return self.greet_intent()
-            elif intent == 'farewell_intent':
-                return self.farewell_intent()
-            elif intent == 'ask_name_intent':
-                return self.ask_name_intent()
-            elif intent == 'weather_intent':
-                return self.weather_intent()
-    return self.no_match_intent()
-
-
-    # Existing intent handlers
-    def describe_planet_intent(self):
-        return "My planet is a vast, cold wasteland with crystalline mountains and glowing lakes."
-
-    def answer_why_intent(self):
-        return "I am here to collect information about your species and your planet."
-
-    def about_intellipat(self):
-        return "Intellipaat is an e-learning platform that offers technical courses to help humans grow smarter."
-
-    # New intent handlers added
-    def greet_intent(self):
-        return "Hello there! How can I learn more about your planet today?"
-
-    def farewell_intent(self):
-        return "Goodbye! Safe travels on Earth."
-
-    def ask_name_intent(self):
-        return "I am Rule-Bot, your friendly alien chatbot."
-
-    def weather_intent(self):
-        return "I have not yet learned about your weather systems. Can you tell me more?"
-
-    def no_match_intent(self):
-        return random.choice(self.no_match_responses)
-
-    @property
-    def no_match_responses(self):
-        return (
+        self.no_match_responses = (
             "Please tell me more.",
             "Tell me more!",
             "Why do you say that?",
@@ -132,6 +40,77 @@ class RuleBot:
             "Go on, I'm listening."
         )
 
-# Run the bot
-AlienBot = RuleBot()
-AlienBot.greet()
+    def match_reply(self, reply):
+        for intent, pattern in self.alienbabble.items():
+            if re.search(pattern, reply, re.IGNORECASE):
+                if intent == 'describe_planet_intent':
+                    return self.describe_planet_intent()
+                elif intent == 'answer_why_intent':
+                    return self.answer_why_intent()
+                elif intent == 'about_intellipat':
+                    return self.about_intellipat()
+        return random.choice(self.no_match_responses)
+
+    def describe_planet_intent(self):
+        return "My planet is a vast, cold wasteland with crystalline mountains and glowing lakes."
+
+    def answer_why_intent(self):
+        return "I am here to collect information about your species and your planet."
+
+    def about_intellipat(self):
+        return "Intellipaat is an e-learning platform that offers technical courses to help humans grow smarter."
+
+
+class ChatGUI:
+    def __init__(self, bot):
+        self.bot = bot
+        self.window = tk.Tk()
+        self.window.title("RuleBot Chat")
+
+        # Chat display area
+        self.chat_area = scrolledtext.ScrolledText(self.window, wrap=tk.WORD, state='disabled', width=60, height=20)
+        self.chat_area.pack(padx=10, pady=10)
+
+        # Input box
+        self.entry = tk.Entry(self.window, width=50)
+        self.entry.pack(side=tk.LEFT, padx=(10, 0), pady=(0, 10))
+        self.entry.bind("<Return>", self.send_message)
+
+        # Send button
+        self.send_button = tk.Button(self.window, text="Send", command=self.send_message)
+        self.send_button.pack(side=tk.LEFT, padx=10, pady=(0, 10))
+
+        self.start_chat()
+
+    def start_chat(self):
+        # Start with a random question from the bot
+        starter = random.choice(self.bot.random_questions)
+        self.display_message("RuleBot: " + starter)
+
+    def display_message(self, message):
+        self.chat_area.config(state='normal')
+        self.chat_area.insert(tk.END, message + "\n\n")
+        self.chat_area.config(state='disabled')
+        self.chat_area.yview(tk.END)
+
+    def send_message(self, event=None):
+        user_msg = self.entry.get().strip()
+        if not user_msg:
+            return
+
+        self.display_message("You: " + user_msg)
+        self.entry.delete(0, tk.END)
+
+        if user_msg.lower() in self.bot.exit_commands:
+            self.display_message("RuleBot: Okay, have a nice Earth day! Goodbye!")
+            self.window.after(2000, self.window.destroy)
+            return
+
+        bot_reply = self.bot.match_reply(user_msg)
+        self.display_message("RuleBot: " + bot_reply)
+
+
+if __name__ == "__main__":
+    bot = RuleBot()
+    gui = ChatGUI(bot)
+    gui.window.mainloop()
