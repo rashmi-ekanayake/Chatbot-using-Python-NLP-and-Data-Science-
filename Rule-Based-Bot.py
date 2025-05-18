@@ -2,21 +2,21 @@ import re
 import random
 
 class RuleBot:
-    ### Potential Negative Responses
-    negative_responces = ("no", "nope", "nah", "naw", "not a chance", "sorry")
+    # Potential Negative Responses
+    negative_responses = ("no", "nope", "nah", "naw", "not a chance", "sorry")
 
-    ### Exit conversation keywords
+    # Exit conversation keywords
     exit_commands = ("quit", "pause", "exit", "goodbye", "bye", "later")
 
-    ### Random starter question
+    # Random starter questions
     random_questions = (
-        "why are you here?",
+        "Why are you here?",
         "Are there many humans like you?",
-        "What do you consume for subtenance?",
+        "What do you consume for sustenance?",
         "Is there intelligent life on this planet?",
-        "Does earth has a leader?",
-        "What planet have u visited?",
-        "What technology do u have on this planet?"
+        "Does Earth have a leader?",
+        "What planet have you visited?",
+        "What technology do you have on this planet?"
     )
 
     def __init__(self):
@@ -31,22 +31,35 @@ class RuleBot:
         will_help = input(
             f"Hi {self.name}, I am Rule-Bot. Will you help me learn about your planet?\n"
         )
-        if will_help in self.negative_responces:
+        if will_help.lower() in self.negative_responses:
             print("Ok, have a nice Earth day!")
             return
         self.chat()
 
     def make_exit(self, reply):
         for command in self.exit_commands:
-            if reply == command:
+            if reply.lower() == command:
                 print("Okay, have a nice Earth day!")
                 return True
         return False
 
     def chat(self):
+        no_match_count = 0
         reply = input(random.choice(self.random_questions)).lower()
+
         while not self.make_exit(reply):
-            reply = input(self.match_reply(reply))
+            response = self.match_reply(reply)
+
+            if response in self.no_match_responses:
+                no_match_count += 1
+            else:
+                no_match_count = 0  # Reset on meaningful answer
+
+            if no_match_count >= 2:
+                reply = input(random.choice(self.random_questions)).lower()
+                no_match_count = 0
+            else:
+                reply = input(response).lower()
 
     def match_reply(self, reply):
         for key, value in self.alienbabble.items():
@@ -71,25 +84,28 @@ class RuleBot:
         return "Intellipaat is an e-learning platform that offers technical courses to help humans grow smarter."
 
     def no_match_intent(self):
-    responses = (
-        "Please tell me more.",
-        "Tell me more!",
-        "Why do you say that?",
-        "I see. Can you elaborate?",
-        "Interesting, can you tell me more?",
-        "I see. How do you think?",
-        "Why?",
-        "How do you think I feel when you say that?",
-        "That's fascinating! Could you go on?",
-        "Hmm, what makes you say that?",
-        "Would you care to explain further?",
-        "Your planet seems complex. Please continue.",
-        "I'm learning so much. What else can you share?",
-        "This is new to me. Keep going!",
-        "Go on, I'm listening."
-    )
-    return random.choice(responses)
+        return random.choice(self.no_match_responses)
 
+    @property
+    def no_match_responses(self):
+        return (
+            "Please tell me more.",
+            "Tell me more!",
+            "Why do you say that?",
+            "I see. Can you elaborate?",
+            "Interesting, can you tell me more?",
+            "I see. How do you think?",
+            "Why?",
+            "How do you think I feel when you say that?",
+            "That's fascinating! Could you go on?",
+            "Hmm, what makes you say that?",
+            "Would you care to explain further?",
+            "Your planet seems complex. Please continue.",
+            "I'm learning so much. What else can you share?",
+            "This is new to me. Keep going!",
+            "Go on, I'm listening."
+        )
 
+# Run the bot
 AlienBot = RuleBot()
 AlienBot.greet()
