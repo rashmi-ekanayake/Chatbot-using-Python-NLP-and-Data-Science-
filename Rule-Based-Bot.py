@@ -67,23 +67,24 @@ class RuleBot:
                 reply = input(response).lower()
 
     def match_reply(self, reply):
-        for intent, pattern in self.alienbabble.items():
-            if re.match(pattern, reply):
-                if intent == 'describe_planet_intent':
-                    return self.describe_planet_intent()
-                elif intent == 'answer_why_intent':
-                    return self.answer_why_intent()
-                elif intent == 'about_intellipat':
-                    return self.about_intellipat()
-                elif intent == 'greet_intent':
-                    return self.greet_intent()
-                elif intent == 'farewell_intent':
-                    return self.farewell_intent()
-                elif intent == 'ask_name_intent':
-                    return self.ask_name_intent()
-                elif intent == 'weather_intent':
-                    return self.weather_intent()
-        return self.no_match_intent()
+    for intent, pattern in self.alienbabble.items():
+        if re.search(pattern, reply):  # changed from re.match() to re.search()
+            if intent == 'describe_planet_intent':
+                return self.describe_planet_intent()
+            elif intent == 'answer_why_intent':
+                return self.answer_why_intent()
+            elif intent == 'about_intellipat':
+                return self.about_intellipat()
+            elif intent == 'greet_intent':
+                return self.greet_intent()
+            elif intent == 'farewell_intent':
+                return self.farewell_intent()
+            elif intent == 'ask_name_intent':
+                return self.ask_name_intent()
+            elif intent == 'weather_intent':
+                return self.weather_intent()
+    return self.no_match_intent()
+
 
     # Existing intent handlers
     def describe_planet_intent(self):
