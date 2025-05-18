@@ -71,12 +71,25 @@ class RuleBot:
         return "Intellipaat is an e-learning platform that offers technical courses to help humans grow smarter."
 
     def no_match_intent(self):
-        responses = (
-            "Please tell me more.\n", "Tell me more!.\n", "Why do you say that?\n", "I see. Can you elaborate?\n",
-            "Interesting, can you tell me more?\n", "I see. How do you think?\n", "Why?\n",
-            "How do you think I feel when you say that?\n"
-        )
-        return random.choice(responses)
+    responses = (
+        "Please tell me more.",
+        "Tell me more!",
+        "Why do you say that?",
+        "I see. Can you elaborate?",
+        "Interesting, can you tell me more?",
+        "I see. How do you think?",
+        "Why?",
+        "How do you think I feel when you say that?",
+        "That's fascinating! Could you go on?",
+        "Hmm, what makes you say that?",
+        "Would you care to explain further?",
+        "Your planet seems complex. Please continue.",
+        "I'm learning so much. What else can you share?",
+        "This is new to me. Keep going!",
+        "Go on, I'm listening."
+    )
+    return random.choice(responses)
+
 
 AlienBot = RuleBot()
 AlienBot.greet()
