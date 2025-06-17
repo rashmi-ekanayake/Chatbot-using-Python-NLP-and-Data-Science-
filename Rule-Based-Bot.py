@@ -70,7 +70,7 @@ class ChatGUI:
 
         # Chat display area
         self.chat_area = scrolledtext.ScrolledText(self.window, wrap=tk.WORD, state='disabled', width=60, height=20)
-        self.chat_area.pack(padx=10, pady=10)
+        self.chat_area.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
 
         # Input box
         self.entry = tk.Entry(self.window, width=50)
@@ -85,10 +85,7 @@ class ChatGUI:
         self.clear_button = tk.Button(self.window, text="Clear", command=self.clear_chat, bg="red", fg="white")
         self.clear_button.pack(side=tk.LEFT, padx=(0, 10), pady=(0, 10))
 
-
         self.start_chat()
-
-        
 
     def start_chat(self):
         # Start with a random question from the bot
@@ -106,11 +103,6 @@ class ChatGUI:
         user_msg = self.entry.get().strip()
         if not user_msg:
             return
-    def clear_chat(self):
-        self.chat_area.config(state='normal')
-        self.chat_area.delete(1.0, tk.END)
-        self.chat_area.config(state='disabled')
-
 
         self.display_message("You: " + user_msg)
         self.entry.delete(0, tk.END)
@@ -122,6 +114,11 @@ class ChatGUI:
 
         bot_reply = self.bot.match_reply(user_msg)
         self.display_message("RuleBot: " + bot_reply)
+
+    def clear_chat(self):
+        self.chat_area.config(state='normal')
+        self.chat_area.delete(1.0, tk.END)
+        self.chat_area.config(state='disabled')
 
 
 if __name__ == "__main__":
