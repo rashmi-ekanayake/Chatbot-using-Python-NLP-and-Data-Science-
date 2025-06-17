@@ -81,7 +81,14 @@ class ChatGUI:
         self.send_button = tk.Button(self.window, text="Send", command=self.send_message)
         self.send_button.pack(side=tk.LEFT, padx=10, pady=(0, 10))
 
+        # Clear button
+        self.clear_button = tk.Button(self.window, text="Clear", command=self.clear_chat, bg="red", fg="white")
+        self.clear_button.pack(side=tk.LEFT, padx=(0, 10), pady=(0, 10))
+
+
         self.start_chat()
+
+        
 
     def start_chat(self):
         # Start with a random question from the bot
@@ -99,6 +106,11 @@ class ChatGUI:
         user_msg = self.entry.get().strip()
         if not user_msg:
             return
+    def clear_chat(self):
+        self.chat_area.config(state='normal')
+        self.chat_area.delete(1.0, tk.END)
+        self.chat_area.config(state='disabled')
+
 
         self.display_message("You: " + user_msg)
         self.entry.delete(0, tk.END)
