@@ -1,5 +1,6 @@
 import re
 import random
+import datetime
 import tkinter as tk
 from tkinter import scrolledtext
 
@@ -88,8 +89,9 @@ class ChatGUI:
         self.display_message("RuleBot: " + starter)
 
     def display_message(self, message):
+        timestamp = datetime.datetime.now().strftime("%H:%M")
         self.chat_area.config(state='normal')
-        self.chat_area.insert(tk.END, message + "\n\n")
+        self.chat_area.insert(tk.END, f"{message} ({timestamp})\n\n")
         self.chat_area.config(state='disabled')
         self.chat_area.yview(tk.END)
 
