@@ -67,31 +67,67 @@ class ChatGUI:
         self.bot = bot
         self.window = tk.Tk()
         self.window.title("RuleBot Chat")
-        self.window.configure(bg="#1e1e1e")
 
-        # Chat display area
+        # Theme state
+        self.dark_mode = True
+
+        # Toggle Button
+        self.toggle_button = tk.Button(self.window, text="Switch to Light Mode",
+                                       command=self.toggle_theme, bg="#444", fg="white")
+        self.toggle_button.pack(anchor="ne", padx=10, pady=(10, 0))
+
+        # Chat area
         self.chat_area = scrolledtext.ScrolledText(self.window, wrap=tk.WORD, state='disabled',
-                                                   width=60, height=20, bg="#2e2e2e", fg="#e0e0e0",
-                                                   font=("Segoe UI", 11))
-        self.chat_area.pack(padx=10, pady=10)
+                                                   width=60, height=20)
+        self.chat_area.pack(padx=10, pady=(0, 10))
 
-        # Input box
-        self.entry = tk.Entry(self.window, width=50, bg="#333333", fg="#ffffff", insertbackground="#ffffff",
-                              font=("Segoe UI", 11))
+        # Entry
+        self.entry = tk.Entry(self.window, width=50)
         self.entry.pack(side=tk.LEFT, padx=(10, 0), pady=(0, 10))
         self.entry.bind("<Return>", self.send_message)
 
-        # Send button
-        self.send_button = tk.Button(self.window, text="Send", command=self.send_message,
-                                     bg="#007acc", fg="white", font=("Segoe UI", 10, "bold"))
+        # Send Button
+        self.send_button = tk.Button(self.window, text="Send", command=self.send_message)
         self.send_button.pack(side=tk.LEFT, padx=10, pady=(0, 10))
 
-        # Clear button
-        self.clear_button = tk.Button(self.window, text="Clear", command=self.clear_chat,
-                                      bg="red", fg="white", font=("Segoe UI", 10, "bold"))
+        # Clear Button
+        self.clear_button = tk.Button(self.window, text="Clear", command=self.clear_chat)
         self.clear_button.pack(side=tk.LEFT, padx=(0, 10), pady=(0, 10))
 
+        self.apply_theme()
         self.start_chat()
+
+    def apply_theme(self):
+        if self.dark_mode:
+            bg_color = "#1e1e1e"
+            text_bg = "#2e2e2e"
+            text_fg = "#e0e0e0"
+            entry_bg = "#333"
+            entry_fg = "#fff"
+            self.window.configure(bg=bg_color)
+            self.chat_area.configure(bg=text_bg, fg=text_fg, font=("Segoe UI", 11))
+            self.entry.configure(bg=entry_bg, fg=entry_fg, insertbackground=entry_fg,
+                                 font=("Segoe UI", 11))
+            self.send_button.configure(bg="#007acc", fg="white", font=("Segoe UI", 10, "bold"))
+            self.clear_button.configure(bg="red", fg="white", font=("Segoe UI", 10, "bold"))
+            self.toggle_button.configure(text="Switch to Light Mode", bg="#444", fg="white")
+        else:
+            bg_color = "#f0f0f0"
+            text_bg = "white"
+            text_fg = "black"
+            entry_bg = "white"
+            entry_fg = "black"
+            self.window.configure(bg=bg_color)
+            self.chat_area.configure(bg=text_bg, fg=text_fg, font=("Arial", 11))
+            self.entry.configure(bg=entry_bg, fg=entry_fg, insertbackground=entry_fg,
+                                 font=("Arial", 11))
+            self.send_button.configure(bg="#007acc", fg="white", font=("Arial", 10, "bold"))
+            self.clear_button.configure(bg="red", fg="white", font=("Arial", 10, "bold"))
+            self.toggle_button.configure(text="Switch to Dark Mode", bg="#ddd", fg="black")
+
+    def toggle_theme(self):
+        self.dark_mode = not self.dark_mode
+        self.apply_theme()
 
     def start_chat(self):
         starter = random.choice(self.bot.random_questions)
@@ -110,8 +146,8 @@ class ChatGUI:
         self.chat_area.config(state='disabled')
         self.chat_area.yview(tk.END)
 
-        # Tag styling
-        self.chat_area.tag_config("bot_message", foreground="yellow", font=("Segoe UI", 11, "italic"))
+        self.chat_area.tag_config("bot_message", foreground="orange" if self.dark_mode else "darkblue",
+                                  font=("Segoe UI", 11, "italic" if self.dark_mode else "normal"))
         self.chat_area.tag_config("bot_label", foreground="#00ffff", font=("Segoe UI", 11, "bold"))
 
     def send_message(self, event=None):
