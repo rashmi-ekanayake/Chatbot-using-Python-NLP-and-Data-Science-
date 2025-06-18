@@ -67,52 +67,52 @@ class ChatGUI:
         self.bot = bot
         self.window = tk.Tk()
         self.window.title("RuleBot Chat")
-        self.window.configure(bg="#f0f0f0")
+        self.window.configure(bg="#1e1e1e")
 
-        self.chat_area = scrolledtext.ScrolledText(
-            self.window,
-            wrap=tk.WORD,
-            state='disabled',
-            width=60,
-            height=20,
-            bg="#ffffff",
-            font=("Segoe UI", 11)
-        )
-        self.chat_area.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+        # Chat display area
+        self.chat_area = scrolledtext.ScrolledText(self.window, wrap=tk.WORD, state='disabled',
+                                                   width=60, height=20, bg="#2e2e2e", fg="#e0e0e0",
+                                                   font=("Segoe UI", 11))
+        self.chat_area.pack(padx=10, pady=10)
 
-        # Create text tags before inserting any text
-        self.chat_area.tag_config("user_style", background="yellow", foreground="black", font=("Segoe UI", 10))
-        self.chat_area.tag_config("bot_style", background="#fffaf0", foreground="black", font=("Georgia", 11, "italic"))
-
-        self.entry = tk.Entry(self.window, width=50, font=("Segoe UI", 10), bg="#ffffff", fg="black")
+        # Input box
+        self.entry = tk.Entry(self.window, width=50, bg="#333333", fg="#ffffff", insertbackground="#ffffff",
+                              font=("Segoe UI", 11))
         self.entry.pack(side=tk.LEFT, padx=(10, 0), pady=(0, 10))
         self.entry.bind("<Return>", self.send_message)
 
+        # Send button
         self.send_button = tk.Button(self.window, text="Send", command=self.send_message,
-                                     bg="#4CAF50", fg="white", font=("Segoe UI", 10, "bold"))
+                                     bg="#007acc", fg="white", font=("Segoe UI", 10, "bold"))
         self.send_button.pack(side=tk.LEFT, padx=10, pady=(0, 10))
 
+        # Clear button
         self.clear_button = tk.Button(self.window, text="Clear", command=self.clear_chat,
-                                      bg="#f44336", fg="white", font=("Segoe UI", 10, "bold"))
+                                      bg="red", fg="white", font=("Segoe UI", 10, "bold"))
         self.clear_button.pack(side=tk.LEFT, padx=(0, 10), pady=(0, 10))
 
         self.start_chat()
 
     def start_chat(self):
         starter = random.choice(self.bot.random_questions)
-        self.display_message("RuleBot: " + starter, sender="bot")
+        self.display_message(starter, sender="bot")
 
     def display_message(self, message, sender="bot"):
         timestamp = datetime.datetime.now().strftime("%H:%M")
         self.chat_area.config(state='normal')
 
         if sender == "user":
-            self.chat_area.insert(tk.END, f"You: {message} ({timestamp})\n\n", "user_style")
+            self.chat_area.insert(tk.END, f"You: {message} ({timestamp})\n\n")
         else:
-            self.chat_area.insert(tk.END, f"RuleBot: {message} ({timestamp})\n\n", "bot_style")
+            self.chat_area.insert(tk.END, f"RuleBot: ", ("bot_label",))
+            self.chat_area.insert(tk.END, f"{message} ({timestamp})\n\n", ("bot_message",))
 
         self.chat_area.config(state='disabled')
         self.chat_area.yview(tk.END)
+
+        # Tag styling
+        self.chat_area.tag_config("bot_message", foreground="yellow", font=("Segoe UI", 11, "italic"))
+        self.chat_area.tag_config("bot_label", foreground="#00ffff", font=("Segoe UI", 11, "bold"))
 
     def send_message(self, event=None):
         user_msg = self.entry.get().strip()
@@ -127,14 +127,10 @@ class ChatGUI:
             self.window.after(2000, self.window.destroy)
             return
 
-        # Typing animation: show temporary message
         self.display_message("RuleBot is typing...", sender="bot")
-
-        # Delay actual bot response by 1500ms (1.5 seconds)
         self.window.after(1500, lambda: self.show_bot_reply(user_msg))
 
     def show_bot_reply(self, user_msg):
-        # Delete the 'typing...' line
         self.chat_area.config(state='normal')
         self.chat_area.delete("end-3l", "end-1l")
         self.chat_area.config(state='disabled')
@@ -146,6 +142,7 @@ class ChatGUI:
         self.chat_area.config(state='normal')
         self.chat_area.delete(1.0, tk.END)
         self.chat_area.config(state='disabled')
+
 
 
 if __name__ == "__main__":
