@@ -67,35 +67,50 @@ class ChatGUI:
         self.bot = bot
         self.window = tk.Tk()
         self.window.title("RuleBot Chat")
+        self.window.configure(bg="#f0f0f0")
 
-        # Chat display area
-        self.chat_area = scrolledtext.ScrolledText(self.window, wrap=tk.WORD, state='disabled', width=60, height=20)
+        self.chat_area = scrolledtext.ScrolledText(
+            self.window,
+            wrap=tk.WORD,
+            state='disabled',
+            width=60,
+            height=20,
+            bg="#ffffff",
+            font=("Segoe UI", 11)
+        )
         self.chat_area.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
 
-        # Input box
-        self.entry = tk.Entry(self.window, width=50)
+        # Create text tags before inserting any text
+        self.chat_area.tag_config("user_style", background="yellow", foreground="black", font=("Segoe UI", 10))
+        self.chat_area.tag_config("bot_style", background="#fffaf0", foreground="black", font=("Georgia", 11, "italic"))
+
+        self.entry = tk.Entry(self.window, width=50, font=("Segoe UI", 10), bg="#ffffff", fg="black")
         self.entry.pack(side=tk.LEFT, padx=(10, 0), pady=(0, 10))
         self.entry.bind("<Return>", self.send_message)
 
-        # Send button
-        self.send_button = tk.Button(self.window, text="Send", command=self.send_message)
+        self.send_button = tk.Button(self.window, text="Send", command=self.send_message,
+                                     bg="#4CAF50", fg="white", font=("Segoe UI", 10, "bold"))
         self.send_button.pack(side=tk.LEFT, padx=10, pady=(0, 10))
 
-        # Clear button
-        self.clear_button = tk.Button(self.window, text="Clear", command=self.clear_chat, bg="red", fg="white")
+        self.clear_button = tk.Button(self.window, text="Clear", command=self.clear_chat,
+                                      bg="#f44336", fg="white", font=("Segoe UI", 10, "bold"))
         self.clear_button.pack(side=tk.LEFT, padx=(0, 10), pady=(0, 10))
 
         self.start_chat()
 
     def start_chat(self):
-        # Start with a random question from the bot
         starter = random.choice(self.bot.random_questions)
-        self.display_message("RuleBot: " + starter)
+        self.display_message("RuleBot: " + starter, sender="bot")
 
-    def display_message(self, message):
+    def display_message(self, message, sender="bot"):
         timestamp = datetime.datetime.now().strftime("%H:%M")
         self.chat_area.config(state='normal')
-        self.chat_area.insert(tk.END, f"{message} ({timestamp})\n\n")
+
+        if sender == "user":
+            self.chat_area.insert(tk.END, f"You: {message} ({timestamp})\n\n", "user_style")
+        else:
+            self.chat_area.insert(tk.END, f"RuleBot: {message} ({timestamp})\n\n", "bot_style")
+
         self.chat_area.config(state='disabled')
         self.chat_area.yview(tk.END)
 
@@ -104,16 +119,16 @@ class ChatGUI:
         if not user_msg:
             return
 
-        self.display_message("You: " + user_msg)
+        self.display_message(user_msg, sender="user")
         self.entry.delete(0, tk.END)
 
         if user_msg.lower() in self.bot.exit_commands:
-            self.display_message("RuleBot: Okay, have a nice Earth day! Goodbye!")
+            self.display_message("Okay, have a nice Earth day! Goodbye!", sender="bot")
             self.window.after(2000, self.window.destroy)
             return
 
         bot_reply = self.bot.match_reply(user_msg)
-        self.display_message("RuleBot: " + bot_reply)
+        self.display_message(bot_reply, sender="bot")
 
     def clear_chat(self):
         self.chat_area.config(state='normal')
