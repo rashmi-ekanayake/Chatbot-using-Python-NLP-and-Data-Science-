@@ -4,7 +4,6 @@ import datetime
 import tkinter as tk
 from tkinter import scrolledtext
 import pyttsx3
-import threading
 
 class RuleBot:
     negative_responses = ("no", "nope", "nah", "naw", "not a chance", "sorry")
@@ -70,7 +69,7 @@ class ChatGUI:
         self.window = tk.Tk()
         self.window.title("RuleBot Chat")
 
-        # Speech engine
+        # Initialize pyttsx3 engine
         self.engine = pyttsx3.init()
 
         # Theme state
@@ -100,7 +99,9 @@ class ChatGUI:
         self.clear_button.pack(side=tk.LEFT, padx=(0, 10), pady=(0, 10))
 
         self.apply_theme()
-        self.start_chat()
+
+        # Start chat with delay: display then speak
+        self.window.after(500, self.start_chat)
 
     def apply_theme(self):
         if self.dark_mode:
@@ -137,7 +138,7 @@ class ChatGUI:
     def start_chat(self):
         starter = random.choice(self.bot.random_questions)
         self.display_message(starter, sender="bot")
-        self.speak(starter)
+        self.window.after(100, lambda: self.speak(starter))
 
     def display_message(self, message, sender="bot"):
         timestamp = datetime.datetime.now().strftime("%H:%M")
@@ -165,27 +166,28 @@ class ChatGUI:
         self.entry.delete(0, tk.END)
 
         if user_msg.lower() in self.bot.exit_commands:
-            self.display_message("Okay, have a nice Earth day! Goodbye!", sender="bot")
-            self.speak("Okay, have a nice Earth day! Goodbye!")
+            goodbye_msg = "Okay, have a nice Earth day! Goodbye!"
+            self.display_message(goodbye_msg, sender="bot")
+            self.window.after(100, lambda: self.speak(goodbye_msg))
             self.window.after(2000, self.window.destroy)
             return
 
         self.display_message("RuleBot is typing...", sender="bot")
+
+        # Remove "RuleBot is typing..." after delay, then show reply and speak
         self.window.after(1500, lambda: self.show_bot_reply(user_msg))
 
     def show_bot_reply(self, user_msg):
         self.chat_area.config(state='normal')
-        self.chat_area.delete("end-3l", "end-1l")  # Delete "RuleBot is typing..."
+        # Remove last 3 lines (the "RuleBot is typing..." message)
+        self.chat_area.delete("end-3l", "end-1l")
         self.chat_area.config(state='disabled')
 
         bot_reply = self.bot.match_reply(user_msg)
         self.display_message(bot_reply, sender="bot")
 
-        # Force GUI update before speaking
-        self.window.update_idletasks()
-
-        # Speak in a new thread (non-blocking)
-        threading.Thread(target=self.speak, args=(bot_reply,), daemon=True).start()
+        # Speak after displaying
+        self.window.after(100, lambda: self.speak(bot_reply))
 
     def clear_chat(self):
         self.chat_area.config(state='normal')
@@ -193,6 +195,7 @@ class ChatGUI:
         self.chat_area.config(state='disabled')
 
     def speak(self, text):
+        # Non-blocking speaking
         self.engine.say(text)
         self.engine.runAndWait()
 
