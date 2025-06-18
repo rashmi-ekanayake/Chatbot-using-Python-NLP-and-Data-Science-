@@ -3,7 +3,7 @@ import random
 import datetime
 import tkinter as tk
 from tkinter import scrolledtext
-import pyttsx3  # <-- add this import
+import pyttsx3
 
 class RuleBot:
     negative_responses = ("no", "nope", "nah", "naw", "not a chance", "sorry")
@@ -172,18 +172,18 @@ class ChatGUI:
             return
 
         self.display_message("RuleBot is typing...", sender="bot")
-        self.speak("RuleBot is typing...")
+        # NO speech here to avoid speaking the typing message
 
         self.window.after(1500, lambda: self.show_bot_reply(user_msg))
 
     def show_bot_reply(self, user_msg):
         self.chat_area.config(state='normal')
-        self.chat_area.delete("end-3l", "end-1l")
+        self.chat_area.delete("end-3l", "end-1l")  # Remove "typing..." message
         self.chat_area.config(state='disabled')
 
         bot_reply = self.bot.match_reply(user_msg)
         self.display_message(bot_reply, sender="bot")
-        self.speak(bot_reply)
+        self.speak(bot_reply)  # Speak only the real reply
 
     def clear_chat(self):
         self.chat_area.config(state='normal')
@@ -191,7 +191,6 @@ class ChatGUI:
         self.chat_area.config(state='disabled')
 
     def speak(self, text):
-        # Speak the text asynchronously so GUI doesn't freeze
         self.engine.say(text)
         self.engine.runAndWait()
 
