@@ -66,18 +66,14 @@ class RuleBot:
 class ChatGUI:
     def __init__(self, bot):
         self.bot = bot
+        self.engine = pyttsx3.init()
         self.window = tk.Tk()
         self.window.title("RuleBot Chat")
-
-        # Text to speech engine
-        self.engine = pyttsx3.init()
-
-        # Theme state
         self.dark_mode = True
 
-        # Toggle Button
-        self.toggle_button = tk.Button(self.window, text="Switch to Light Mode",
-                                       command=self.toggle_theme, bg="#444", fg="white")
+        # Toggle button
+        self.toggle_button = tk.Button(self.window, text="🌙 Dark Mode",
+                                       command=self.toggle_theme)
         self.toggle_button.pack(anchor="ne", padx=10, pady=(10, 0))
 
         # Chat area
@@ -85,92 +81,55 @@ class ChatGUI:
                                                    width=60, height=20)
         self.chat_area.pack(padx=10, pady=(0, 10))
 
-        # Entry
+        # Entry field
         self.entry = tk.Entry(self.window, width=50)
         self.entry.pack(side=tk.LEFT, padx=(10, 0), pady=(0, 10))
         self.entry.bind("<Return>", self.send_message)
 
-        # Send Button
-        self.send_button = tk.Button(self.window, text="Send", command=self.send_message,
-                                     bg="#007acc", fg="white", font=("Segoe UI", 10, "bold"))
+        # Send button
+        self.send_button = tk.Button(self.window, text="Send", command=self.send_message)
         self.send_button.pack(side=tk.LEFT, padx=10, pady=(0, 10))
 
-        # Clear Button
-        self.clear_button = tk.Button(self.window, text="Clear", command=self.clear_chat,
-                                      bg="red", fg="white", font=("Segoe UI", 10, "bold"))
+        # Clear button
+        self.clear_button = tk.Button(self.window, text="Clear", command=self.clear_chat)
         self.clear_button.pack(side=tk.LEFT, padx=(0, 10), pady=(0, 10))
 
-        # Add hover effects to buttons
-        self.add_hover_effects()
+        # Button hover effects
+        for btn in [self.send_button, self.clear_button, self.toggle_button]:
+            btn.bind("<Enter>", lambda e, b=btn: b.config(bg="#555"))
+            btn.bind("<Leave>", lambda e, b=btn: self.apply_theme())
 
         self.apply_theme()
         self.start_chat()
 
-    def add_hover_effects(self):
-        def on_send_enter(e):
-            e.widget['background'] = '#005f9e'  # Darker blue on hover
-        def on_send_leave(e):
-            e.widget['background'] = '#007acc'  # Original blue
-
-        def on_clear_enter(e):
-            e.widget['background'] = '#b22222'  # Darker red on hover
-        def on_clear_leave(e):
-            e.widget['background'] = 'red'  # Original red
-
-        self.send_button.bind("<Enter>", on_send_enter)
-        self.send_button.bind("<Leave>", on_send_leave)
-        self.clear_button.bind("<Enter>", on_clear_enter)
-        self.clear_button.bind("<Leave>", on_clear_leave)
-
-    def apply_theme(self):
-        if self.dark_mode:
-            bg_color = "#1e1e1e"
-            text_bg = "#2e2e2e"
-            text_fg = "#e0e0e0"
-            entry_bg = "#333"
-            entry_fg = "#fff"
-            self.window.configure(bg=bg_color)
-            self.chat_area.configure(bg=text_bg, fg=text_fg, font=("Segoe UI", 11))
-            self.entry.configure(bg=entry_bg, fg=entry_fg, insertbackground=entry_fg,
-                                 font=("Segoe UI", 11))
-            self.send_button.configure(bg="#007acc", fg="white", font=("Segoe UI", 10, "bold"))
-            self.clear_button.configure(bg="red", fg="white", font=("Segoe UI", 10, "bold"))
-            self.toggle_button.configure(text="Switch to Light Mode", bg="#444", fg="white")
-
-            # Scrollbar styling (basic)
-            self.chat_area.vbar.config(
-                troughcolor="#2e2e2e",
-                bg="#555555",
-                activebackground="#777777",
-                relief="flat",
-                borderwidth=0
-            )
-        else:
-            bg_color = "#f0f0f0"
-            text_bg = "white"
-            text_fg = "black"
-            entry_bg = "white"
-            entry_fg = "black"
-            self.window.configure(bg=bg_color)
-            self.chat_area.configure(bg=text_bg, fg=text_fg, font=("Arial", 11))
-            self.entry.configure(bg=entry_bg, fg=entry_fg, insertbackground=entry_fg,
-                                 font=("Arial", 11))
-            self.send_button.configure(bg="#007acc", fg="white", font=("Arial", 10, "bold"))
-            self.clear_button.configure(bg="red", fg="white", font=("Arial", 10, "bold"))
-            self.toggle_button.configure(text="Switch to Dark Mode", bg="#ddd", fg="black")
-
-            # Scrollbar styling reset
-            self.chat_area.vbar.config(
-                troughcolor="white",
-                bg="#c0c0c0",
-                activebackground="#a0a0a0",
-                relief="flat",
-                borderwidth=0
-            )
-
     def toggle_theme(self):
         self.dark_mode = not self.dark_mode
         self.apply_theme()
+
+    def apply_theme(self):
+        if self.dark_mode:
+            bg = "#1e1e1e"
+            fg = "#ffffff"
+            entry_bg = "#2b2b2b"
+            self.window.config(bg=bg)
+            self.chat_area.config(bg=entry_bg, fg=fg, insertbackground=fg,
+                                  font=("Segoe UI", 11))
+            self.entry.config(bg=entry_bg, fg=fg, insertbackground=fg,
+                              font=("Segoe UI", 11))
+            self.send_button.config(bg="#444", fg="white")
+            self.clear_button.config(bg="red", fg="white")
+            self.toggle_button.config(text="☀️ Light Mode", bg="#444", fg="white")
+        else:
+            bg = "#f0f0f0"
+            fg = "#000000"
+            self.window.config(bg=bg)
+            self.chat_area.config(bg="white", fg=fg, insertbackground=fg,
+                                  font=("Arial", 11))
+            self.entry.config(bg="white", fg=fg, insertbackground=fg,
+                              font=("Arial", 11))
+            self.send_button.config(bg="#ddd", fg="black")
+            self.clear_button.config(bg="red", fg="white")
+            self.toggle_button.config(text="🌙 Dark Mode", bg="#ddd", fg="black")
 
     def start_chat(self):
         starter = random.choice(self.bot.random_questions)
@@ -180,32 +139,30 @@ class ChatGUI:
     def display_message(self, message, sender="bot"):
         timestamp = datetime.datetime.now().strftime("%H:%M")
         self.chat_area.config(state='normal')
-
         if sender == "user":
             self.chat_area.insert(tk.END, f"You: {message} ({timestamp})\n\n")
         else:
             self.chat_area.insert(tk.END, f"RuleBot: ", ("bot_label",))
-            self.chat_area.insert(tk.END, f"{message} ({timestamp})\n\n", ("bot_message",))
+            self.chat_area.insert(tk.END, f"{message} ({timestamp})\n\n", ("bot_msg",))
 
         self.chat_area.config(state='disabled')
         self.chat_area.yview(tk.END)
 
-        self.chat_area.tag_config("bot_message", foreground="orange" if self.dark_mode else "darkblue",
-                                  font=("Segoe UI", 11, "italic" if self.dark_mode else "normal"))
+        self.chat_area.tag_config("bot_msg", foreground="orange" if self.dark_mode else "darkblue",
+                                  font=("Segoe UI", 11, "italic"))
         self.chat_area.tag_config("bot_label", foreground="#00ffff", font=("Segoe UI", 11, "bold"))
 
     def send_message(self, event=None):
         user_msg = self.entry.get().strip()
         if not user_msg:
             return
-
         self.display_message(user_msg, sender="user")
         self.entry.delete(0, tk.END)
 
         if user_msg.lower() in self.bot.exit_commands:
-            goodbye_msg = "Okay, have a nice Earth day! Goodbye!"
-            self.display_message(goodbye_msg, sender="bot")
-            self.window.after(100, lambda: self.speak(goodbye_msg))
+            goodbye = "Okay, have a nice Earth day! Goodbye!"
+            self.display_message(goodbye, sender="bot")
+            self.window.after(100, lambda: self.speak(goodbye))
             self.window.after(2000, self.window.destroy)
             return
 
