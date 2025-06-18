@@ -3,6 +3,7 @@ import random
 import datetime
 import tkinter as tk
 from tkinter import scrolledtext
+import pyttsx3  # <-- add this import
 
 class RuleBot:
     negative_responses = ("no", "nope", "nah", "naw", "not a chance", "sorry")
@@ -67,9 +68,16 @@ class ChatGUI:
         self.bot = bot
         self.window = tk.Tk()
         self.window.title("RuleBot Chat")
+
+        # Initialize TTS engine
+        self.engine = pyttsx3.init()
+        self.engine.setProperty('rate', 160)  # Speaking rate (words per minute)
+        self.engine.setProperty('volume', 1)  # Volume 0-1
+
+        # Theme state
         self.dark_mode = True
 
-        # Toggle theme button
+        # Toggle Button
         self.toggle_button = tk.Button(self.window, text="Switch to Light Mode",
                                        command=self.toggle_theme, bg="#444", fg="white")
         self.toggle_button.pack(anchor="ne", padx=10, pady=(10, 0))
@@ -84,21 +92,13 @@ class ChatGUI:
         self.entry.pack(side=tk.LEFT, padx=(10, 0), pady=(0, 10))
         self.entry.bind("<Return>", self.send_message)
 
-        # Send and clear buttons
+        # Send Button
         self.send_button = tk.Button(self.window, text="Send", command=self.send_message)
         self.send_button.pack(side=tk.LEFT, padx=10, pady=(0, 10))
 
+        # Clear Button
         self.clear_button = tk.Button(self.window, text="Clear", command=self.clear_chat)
         self.clear_button.pack(side=tk.LEFT, padx=(0, 10), pady=(0, 10))
-
-        # Emoji reaction buttons
-        emoji_frame = tk.Frame(self.window)
-        emoji_frame.pack(pady=(0, 10))
-        emojis = ["😊", "😂", "😮", "😢", "👍", "❤️", "❌"]
-        for emoji in emojis:
-            btn = tk.Button(emoji_frame, text=emoji, font=("Segoe UI Emoji", 12),
-                            width=3, command=lambda e=emoji: self.send_emoji(e))
-            btn.pack(side=tk.LEFT, padx=3)
 
         self.apply_theme()
         self.start_chat()
@@ -112,7 +112,8 @@ class ChatGUI:
             entry_fg = "#fff"
             self.window.configure(bg=bg_color)
             self.chat_area.configure(bg=text_bg, fg=text_fg, font=("Segoe UI", 11))
-            self.entry.configure(bg=entry_bg, fg=entry_fg, insertbackground=entry_fg, font=("Segoe UI", 11))
+            self.entry.configure(bg=entry_bg, fg=entry_fg, insertbackground=entry_fg,
+                                 font=("Segoe UI", 11))
             self.send_button.configure(bg="#007acc", fg="white", font=("Segoe UI", 10, "bold"))
             self.clear_button.configure(bg="red", fg="white", font=("Segoe UI", 10, "bold"))
             self.toggle_button.configure(text="Switch to Light Mode", bg="#444", fg="white")
@@ -124,7 +125,8 @@ class ChatGUI:
             entry_fg = "black"
             self.window.configure(bg=bg_color)
             self.chat_area.configure(bg=text_bg, fg=text_fg, font=("Arial", 11))
-            self.entry.configure(bg=entry_bg, fg=entry_fg, insertbackground=entry_fg, font=("Arial", 11))
+            self.entry.configure(bg=entry_bg, fg=entry_fg, insertbackground=entry_fg,
+                                 font=("Arial", 11))
             self.send_button.configure(bg="#007acc", fg="white", font=("Arial", 10, "bold"))
             self.clear_button.configure(bg="red", fg="white", font=("Arial", 10, "bold"))
             self.toggle_button.configure(text="Switch to Dark Mode", bg="#ddd", fg="black")
@@ -136,10 +138,12 @@ class ChatGUI:
     def start_chat(self):
         starter = random.choice(self.bot.random_questions)
         self.display_message(starter, sender="bot")
+        self.speak(starter)
 
     def display_message(self, message, sender="bot"):
         timestamp = datetime.datetime.now().strftime("%H:%M")
         self.chat_area.config(state='normal')
+
         if sender == "user":
             self.chat_area.insert(tk.END, f"You: {message} ({timestamp})\n\n")
         else:
@@ -149,48 +153,47 @@ class ChatGUI:
         self.chat_area.config(state='disabled')
         self.chat_area.yview(tk.END)
 
-        self.chat_area.tag_config("bot_message",
-                                  foreground="orange" if self.dark_mode else "darkblue",
-                                  font=("Segoe UI", 11, "italic"))
-        self.chat_area.tag_config("bot_label",
-                                  foreground="#00ffff", font=("Segoe UI", 11, "bold"))
+        self.chat_area.tag_config("bot_message", foreground="orange" if self.dark_mode else "darkblue",
+                                  font=("Segoe UI", 11, "italic" if self.dark_mode else "normal"))
+        self.chat_area.tag_config("bot_label", foreground="#00ffff", font=("Segoe UI", 11, "bold"))
 
     def send_message(self, event=None):
         user_msg = self.entry.get().strip()
         if not user_msg:
             return
+
         self.display_message(user_msg, sender="user")
         self.entry.delete(0, tk.END)
 
         if user_msg.lower() in self.bot.exit_commands:
             self.display_message("Okay, have a nice Earth day! Goodbye!", sender="bot")
+            self.speak("Okay, have a nice Earth day! Goodbye!")
             self.window.after(2000, self.window.destroy)
             return
 
         self.display_message("RuleBot is typing...", sender="bot")
+        self.speak("RuleBot is typing...")
+
         self.window.after(1500, lambda: self.show_bot_reply(user_msg))
 
     def show_bot_reply(self, user_msg):
         self.chat_area.config(state='normal')
-        self.chat_area.delete("end-3l", "end-1l")  # remove typing...
+        self.chat_area.delete("end-3l", "end-1l")
         self.chat_area.config(state='disabled')
 
         bot_reply = self.bot.match_reply(user_msg)
         self.display_message(bot_reply, sender="bot")
-
-    def send_emoji(self, emoji):
-        self.display_message(emoji, sender="user")
-        if emoji.lower() in self.bot.exit_commands:
-            self.display_message("Okay, have a nice Earth day! Goodbye!", sender="bot")
-            self.window.after(2000, self.window.destroy)
-            return
-        self.display_message("RuleBot is typing...", sender="bot")
-        self.window.after(1500, lambda: self.show_bot_reply(emoji))
+        self.speak(bot_reply)
 
     def clear_chat(self):
         self.chat_area.config(state='normal')
         self.chat_area.delete(1.0, tk.END)
         self.chat_area.config(state='disabled')
+
+    def speak(self, text):
+        # Speak the text asynchronously so GUI doesn't freeze
+        self.engine.say(text)
+        self.engine.runAndWait()
 
 
 if __name__ == "__main__":
