@@ -69,10 +69,8 @@ class ChatGUI:
         self.window = tk.Tk()
         self.window.title("RuleBot Chat")
 
-        # Initialize TTS engine
+        # Speech engine
         self.engine = pyttsx3.init()
-        self.engine.setProperty('rate', 160)  # Speaking rate (words per minute)
-        self.engine.setProperty('volume', 1)  # Volume 0-1
 
         # Theme state
         self.dark_mode = True
@@ -172,18 +170,18 @@ class ChatGUI:
             return
 
         self.display_message("RuleBot is typing...", sender="bot")
-        # NO speech here to avoid speaking the typing message
-
         self.window.after(1500, lambda: self.show_bot_reply(user_msg))
 
     def show_bot_reply(self, user_msg):
         self.chat_area.config(state='normal')
-        self.chat_area.delete("end-3l", "end-1l")  # Remove "typing..." message
+        self.chat_area.delete("end-3l", "end-1l")  # Delete "RuleBot is typing..."
         self.chat_area.config(state='disabled')
 
         bot_reply = self.bot.match_reply(user_msg)
         self.display_message(bot_reply, sender="bot")
-        self.speak(bot_reply)  # Speak only the real reply
+
+        # Speak the bot reply after displaying it
+        self.speak(bot_reply)
 
     def clear_chat(self):
         self.chat_area.config(state='normal')
