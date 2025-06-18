@@ -4,6 +4,7 @@ import datetime
 import tkinter as tk
 from tkinter import scrolledtext
 import pyttsx3
+import threading
 
 class RuleBot:
     negative_responses = ("no", "nope", "nah", "naw", "not a chance", "sorry")
@@ -180,8 +181,11 @@ class ChatGUI:
         bot_reply = self.bot.match_reply(user_msg)
         self.display_message(bot_reply, sender="bot")
 
-        # Speak the bot reply after displaying it
-        self.speak(bot_reply)
+        # Force GUI update before speaking
+        self.window.update_idletasks()
+
+        # Speak in a new thread (non-blocking)
+        threading.Thread(target=self.speak, args=(bot_reply,), daemon=True).start()
 
     def clear_chat(self):
         self.chat_area.config(state='normal')
