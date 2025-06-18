@@ -5,7 +5,6 @@ import tkinter as tk
 from tkinter import scrolledtext
 import pyttsx3
 
-
 class RuleBot:
     negative_responses = ("no", "nope", "nah", "naw", "not a chance", "sorry")
     exit_commands = ("quit", "pause", "exit", "goodbye", "bye", "later")
@@ -67,56 +66,61 @@ class RuleBot:
 class ChatGUI:
     def __init__(self, bot):
         self.bot = bot
-        self.engine = pyttsx3.init()
         self.window = tk.Tk()
         self.window.title("RuleBot Chat")
+
+        # Text to speech engine
+        self.engine = pyttsx3.init()
 
         # Theme state
         self.dark_mode = True
 
         # Toggle Button
         self.toggle_button = tk.Button(self.window, text="Switch to Light Mode",
-                                       command=self.toggle_theme,
-                                       bg="#444", fg="white",
-                                       bd=0, relief='flat',
-                                       font=("Segoe UI", 10, "bold"),
-                                       activebackground="#555")
+                                       command=self.toggle_theme, bg="#444", fg="white")
         self.toggle_button.pack(anchor="ne", padx=10, pady=(10, 0))
 
-        # Frame to hold chat area with padding and background color to simulate rounded edges
-        self.chat_frame = tk.Frame(self.window, bg="#444444", padx=5, pady=5)
-        self.chat_frame.pack(padx=10, pady=10)
-
-        self.chat_area = scrolledtext.ScrolledText(self.chat_frame, wrap=tk.WORD, state='disabled',
-                                                   width=60, height=20,
-                                                   bd=0, relief='flat',
-                                                   font=("Segoe UI", 11))
-        self.chat_area.pack()
+        # Chat area
+        self.chat_area = scrolledtext.ScrolledText(self.window, wrap=tk.WORD, state='disabled',
+                                                   width=60, height=20)
+        self.chat_area.pack(padx=10, pady=(0, 10))
 
         # Entry
-        self.entry = tk.Entry(self.window, width=50, bd=0, relief='flat', font=("Segoe UI", 11))
+        self.entry = tk.Entry(self.window, width=50)
         self.entry.pack(side=tk.LEFT, padx=(10, 0), pady=(0, 10))
         self.entry.bind("<Return>", self.send_message)
 
-        # Buttons style dictionary for reuse
-        button_style = {
-            'bd': 0,
-            'relief': 'flat',
-            'font': ("Segoe UI", 10, "bold"),
-            'activebackground': '#005f99'
-        }
-
+        # Send Button
         self.send_button = tk.Button(self.window, text="Send", command=self.send_message,
-                                     bg="#007acc", fg="white", **button_style)
+                                     bg="#007acc", fg="white", font=("Segoe UI", 10, "bold"))
         self.send_button.pack(side=tk.LEFT, padx=10, pady=(0, 10))
 
+        # Clear Button
         self.clear_button = tk.Button(self.window, text="Clear", command=self.clear_chat,
-                                      bg="red", fg="white", activebackground="#cc0000",
-                                      bd=0, relief='flat', font=("Segoe UI", 10, "bold"))
+                                      bg="red", fg="white", font=("Segoe UI", 10, "bold"))
         self.clear_button.pack(side=tk.LEFT, padx=(0, 10), pady=(0, 10))
+
+        # Add hover effects to buttons
+        self.add_hover_effects()
 
         self.apply_theme()
         self.start_chat()
+
+    def add_hover_effects(self):
+        def on_send_enter(e):
+            e.widget['background'] = '#005f9e'  # Darker blue on hover
+        def on_send_leave(e):
+            e.widget['background'] = '#007acc'  # Original blue
+
+        def on_clear_enter(e):
+            e.widget['background'] = '#b22222'  # Darker red on hover
+        def on_clear_leave(e):
+            e.widget['background'] = 'red'  # Original red
+
+        self.send_button.bind("<Enter>", on_send_enter)
+        self.send_button.bind("<Leave>", on_send_leave)
+        self.clear_button.bind("<Enter>", on_clear_enter)
+        self.clear_button.bind("<Leave>", on_clear_leave)
 
     def apply_theme(self):
         if self.dark_mode:
@@ -126,12 +130,21 @@ class ChatGUI:
             entry_bg = "#333"
             entry_fg = "#fff"
             self.window.configure(bg=bg_color)
-            self.chat_frame.configure(bg="#444444")
-            self.chat_area.configure(bg=text_bg, fg=text_fg)
-            self.entry.configure(bg=entry_bg, fg=entry_fg, insertbackground=entry_fg)
-            self.send_button.configure(bg="#007acc", fg="white")
-            self.clear_button.configure(bg="red", fg="white")
+            self.chat_area.configure(bg=text_bg, fg=text_fg, font=("Segoe UI", 11))
+            self.entry.configure(bg=entry_bg, fg=entry_fg, insertbackground=entry_fg,
+                                 font=("Segoe UI", 11))
+            self.send_button.configure(bg="#007acc", fg="white", font=("Segoe UI", 10, "bold"))
+            self.clear_button.configure(bg="red", fg="white", font=("Segoe UI", 10, "bold"))
             self.toggle_button.configure(text="Switch to Light Mode", bg="#444", fg="white")
+
+            # Scrollbar styling (basic)
+            self.chat_area.vbar.config(
+                troughcolor="#2e2e2e",
+                bg="#555555",
+                activebackground="#777777",
+                relief="flat",
+                borderwidth=0
+            )
         else:
             bg_color = "#f0f0f0"
             text_bg = "white"
@@ -139,12 +152,21 @@ class ChatGUI:
             entry_bg = "white"
             entry_fg = "black"
             self.window.configure(bg=bg_color)
-            self.chat_frame.configure(bg="#ddd")
-            self.chat_area.configure(bg=text_bg, fg=text_fg)
-            self.entry.configure(bg=entry_bg, fg=entry_fg, insertbackground=entry_fg)
-            self.send_button.configure(bg="#007acc", fg="white")
-            self.clear_button.configure(bg="red", fg="white")
+            self.chat_area.configure(bg=text_bg, fg=text_fg, font=("Arial", 11))
+            self.entry.configure(bg=entry_bg, fg=entry_fg, insertbackground=entry_fg,
+                                 font=("Arial", 11))
+            self.send_button.configure(bg="#007acc", fg="white", font=("Arial", 10, "bold"))
+            self.clear_button.configure(bg="red", fg="white", font=("Arial", 10, "bold"))
             self.toggle_button.configure(text="Switch to Dark Mode", bg="#ddd", fg="black")
+
+            # Scrollbar styling reset
+            self.chat_area.vbar.config(
+                troughcolor="white",
+                bg="#c0c0c0",
+                activebackground="#a0a0a0",
+                relief="flat",
+                borderwidth=0
+            )
 
     def toggle_theme(self):
         self.dark_mode = not self.dark_mode
@@ -192,7 +214,7 @@ class ChatGUI:
 
     def show_bot_reply(self, user_msg):
         self.chat_area.config(state='normal')
-        self.chat_area.delete("end-3l", "end-1l")  # Remove 'typing...' message
+        self.chat_area.delete("end-3l", "end-1l")
         self.chat_area.config(state='disabled')
 
         bot_reply = self.bot.match_reply(user_msg)
