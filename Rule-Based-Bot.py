@@ -127,6 +127,18 @@ class ChatGUI:
             self.window.after(2000, self.window.destroy)
             return
 
+        # Typing animation: show temporary message
+        self.display_message("RuleBot is typing...", sender="bot")
+
+        # Delay actual bot response by 1500ms (1.5 seconds)
+        self.window.after(1500, lambda: self.show_bot_reply(user_msg))
+
+    def show_bot_reply(self, user_msg):
+        # Delete the 'typing...' line
+        self.chat_area.config(state='normal')
+        self.chat_area.delete("end-3l", "end-1l")
+        self.chat_area.config(state='disabled')
+
         bot_reply = self.bot.match_reply(user_msg)
         self.display_message(bot_reply, sender="bot")
 
